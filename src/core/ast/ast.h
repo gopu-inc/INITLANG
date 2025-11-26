@@ -8,6 +8,10 @@
 namespace initlang {
 namespace ast {
 
+// Forward declarations
+class BlockStatement;
+class Expression;
+
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
@@ -72,8 +76,18 @@ public:
     std::unique_ptr<Expression> value;
     bool is_const;
     
-    VariableDeclaration(const std::string& n, std::unique_ptr<Expression> v, bool is_const = false)
-        : name(n), value(std::move(v)), is_const(is_const) {}
+    VariableDeclaration(const std::string& n, std::unique_ptr<Expression> v, bool ic = false)
+        : name(n), value(std::move(v)), is_const(ic) {}
+};
+
+// Déclaration complète de BlockStatement AVANT FunctionDeclaration
+class BlockStatement : public Statement {
+public:
+    std::vector<std::unique_ptr<Statement>> statements;
+    
+    BlockStatement() = default;
+    BlockStatement(std::vector<std::unique_ptr<Statement>> stmts)
+        : statements(std::move(stmts)) {}
 };
 
 class FunctionDeclaration : public Statement {
@@ -86,15 +100,6 @@ public:
                        std::vector<std::string> params,
                        std::unique_ptr<BlockStatement> b)
         : name(n), parameters(std::move(params)), body(std::move(b)) {}
-};
-
-class BlockStatement : public Statement {
-public:
-    std::vector<std::unique_ptr<Statement>> statements;
-    
-    BlockStatement() = default;
-    BlockStatement(std::vector<std::unique_ptr<Statement>> stmts)
-        : statements(std::move(stmts)) {}
 };
 
 class ReturnStatement : public Statement {
